@@ -63,7 +63,7 @@ const signin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             id: user.id,
             email: user.email,
         }, JWTSEC, { expiresIn: "1h" });
-        res.json({ message: "signin Sucessdull", user });
+        res.json({ message: "signin Sucessdull", user, token });
         return;
     }
     catch (err) {

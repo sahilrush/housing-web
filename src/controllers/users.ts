@@ -68,7 +68,7 @@ export const signin = async (req: Request, res: Response) => {
       { expiresIn: "1h" }
     );
 
-    res.json({ message: "signin Sucessdull", user });
+    res.json({ message: "signin Sucessdull", user, token });
     return;
   } catch (err) {
     console.log(err, "internal server error");
