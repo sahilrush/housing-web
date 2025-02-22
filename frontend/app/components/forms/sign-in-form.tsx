@@ -15,13 +15,25 @@ import Link from "next/link";
 import { useState } from "react";
 import axios from "axios";
 
+interface SignInFormData {
+  email: string;
+  password: string;
+}
+
+interface ServerResponse {
+  message: string;
+  user?: any;
+  token?: string;
+}
+
 export default function Signin() {
-  const [formdata, setFormdata] = useState({
+  const [formdata, setFormdata] = useState<SignInFormData>({
     email: "",
     password: "",
   });
 
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormdata({ ...formdata, [e.target.name]: e.target.value });
@@ -29,15 +41,33 @@ export default function Signin() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     try {
-      const response = await axios.post(
+      const response = await axios.post<ServerResponse>(
         "http://localhost:8001/auth/signin",
-        formdata
+        formdata,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
       );
+
       setMessage(response.data.message);
+
+      // Store token if provided
+      if (response.data.token) {
+        localStorage.setItem("token", response.data.token);
+      }
     } catch (err) {
-      console.error("Sign-in Error", err);
-      setMessage("error while signin");
+      if (axios.isAxiosError(err)) {
+        setMessage(err.response?.data?.error || "Error while signing in");
+      } else {
+        setMessage("An unexpected error occurred");
+      }
+      console.error("Sign-in Error:", err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -48,19 +78,19 @@ export default function Signin() {
           <CardHeader className="space-y-1">
             <CardTitle className="text-3xl font-bold">Sign In</CardTitle>
             <CardDescription>
-              Enter your details to Sign in to your account
+              Enter your details to sign in to your account
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-
               <Input
                 id="email"
                 name="email"
-                type="text"
-                placeholder="email"
+                type="email"
+                placeholder="Enter your email"
                 onChange={handleChange}
+                value={formdata.email}
                 required
               />
             </div>
@@ -70,19 +100,33 @@ export default function Signin() {
                 id="password"
                 name="password"
                 type="password"
-                placeholder="password"
+                placeholder="Enter your password"
                 onChange={handleChange}
+                value={formdata.password}
                 required
               />
             </div>
           </CardContent>
-          <CardFooter className="flex flex-col">
-            <Button className="w-full" type="submit">Sign In</Button>
+          <CardFooter className="flex flex-col gap-4">
+            <Button className="w-full" type="submit" disabled={isLoading}>
+              {isLoading ? "Signing in..." : "Sign In"}
+            </Button>
+            {message && (
+              <p
+                className={`text-sm ${
+                  message.includes("error")
+                    ? "text-destructive"
+                    : "text-green-600"
+                }`}
+              >
+                {message}
+              </p>
+            )}
           </CardFooter>
         </Card>
         <div className="mt-4 text-center text-sm">
-          Don't have an account ?
-          <Link className="underline ml-2 " href="/signup">
+          Don&apos;t have an account?{" "}
+          <Link className="underline ml-2" href="/signup">
             Sign Up
           </Link>
         </div>

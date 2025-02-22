@@ -1,11 +1,12 @@
 
-import { z } from "zod";
+import { boolean, z } from "zod";
 
 export const signupSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
+  role:z.string().optional()
 
-});
+}).passthrough();
 
 
 export const signinSchema = z.object({

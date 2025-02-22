@@ -2,7 +2,14 @@ import bodyParser from "body-parser";
 import express from "express";
 import userRouter from "./routes/userRoutes";
 import crudRouter from "./routes/crudRoutes";
+import cors from "cors";
+
 const app = express();
+app.use(cors({
+  origin:"http://localhost:3000",
+}))
+
+
 app.use(bodyParser.json());
 
 app.use(express.json());

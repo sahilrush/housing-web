@@ -1,4 +1,1 @@
-{"root":["./@types/express/index.d.ts","./src/index.ts","./src/controllers/admin.ts","./src/controllers/crud.ts","./src/controllers/users.ts","./src/middleware/adminmiddleware.ts","./src/middleware/usermiddleware.ts","./src/routes/crudroutes.ts","./src/routes/userroutes.ts","./src/types/usertypes.ts"],"version":"5.7.3"}
-
-
-
+{"root":["./express/index.d.ts","./src/index.ts","./src/controllers/admin.ts","./src/controllers/crud.ts","./src/controllers/users.ts","./src/middleware/adminmiddleware.ts","./src/middleware/usermiddleware.ts","./src/routes/crudroutes.ts","./src/routes/userroutes.ts","./src/types/usertypes.ts"],"version":"5.7.3"}

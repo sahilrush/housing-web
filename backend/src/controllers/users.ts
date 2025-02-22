@@ -9,6 +9,7 @@
 
   export const signup = async (req: Request, res: Response) => {
     try {
+      console.log("Received data:", req.body);
       const validateData = signupSchema.parse(req.body);
 
       const existingUser = await prisma.user.findUnique({

@@ -21,6 +21,7 @@ const prisma = new client_1.PrismaClient();
 const JWTSEC = "123415321323";
 const signup = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        console.log("Received data:", req.body);
         const validateData = userTypes_1.signupSchema.parse(req.body);
         const existingUser = yield prisma.user.findUnique({
             where: { email: validateData.email },

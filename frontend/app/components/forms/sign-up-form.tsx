@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Card,
   CardContent,
@@ -13,13 +15,25 @@ import Link from "next/link";
 import axios from "axios";
 import React, { useState } from "react";
 
+interface SignUpFormData {
+  email: string;
+  password: string;
+  role: string;
+}
+
+interface ServerResponse {
+  message: string;
+  user?: any;
+}
+
 export default function SignupForm() {
-  const [formdata, setFormdata] = useState({
+  const [formdata, setFormdata] = useState<SignUpFormData>({
     email: "",
     password: "",
     role: "",
   });
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormdata({ ...formdata, [e.target.name]: e.target.value });
@@ -27,15 +41,34 @@ export default function SignupForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     try {
-      const response = await axios.post(
+      const response = await axios.post<ServerResponse>(
         "http://localhost:8001/auth/signup",
-        formdata
+        formdata,
+        {
+          headers: { "Content-Type": "application/json" },
+        }
       );
       setMessage(response.data.message);
+
+      // Clearing form on success
+      if (!response.data.message.includes("error")) {
+        setFormdata({
+          email: "",
+          password: "",
+          role: "",
+        });
+      }
     } catch (err) {
-      console.error("Sign-up Error", err);
-      setMessage("error while signup");
+      if (axios.isAxiosError(err)) {
+        setMessage(err.response?.data?.error || "Error while signing up");
+      } else {
+        setMessage("An unexpected error occurred");
+      }
+      console.error("Sign-up Error:", err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -46,18 +79,19 @@ export default function SignupForm() {
           <CardHeader className="space-y-1">
             <CardTitle className="text-3xl font-bold">Sign Up</CardTitle>
             <CardDescription>
-              Enter your Details to sign Up to your account
+              Enter your details to create an account
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email"> Email</Label>
+              <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 name="email"
-                type="text"
-                placeholder="email"
+                type="email"
+                placeholder="Enter your email"
                 onChange={handleChange}
+                value={formdata.email}
                 required
               />
             </div>
@@ -68,32 +102,45 @@ export default function SignupForm() {
                 id="password"
                 name="password"
                 type="password"
-                placeholder="password"
+                placeholder="Enter your password"
                 onChange={handleChange}
+                value={formdata.password}
                 required
+                minLength={6}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="Role">Want to become Broker</Label>
+              <Label htmlFor="role">Account Type</Label>
               <Input
                 id="role"
                 name="role"
                 type="text"
-                placeholder="Enter role (Optional)"
+                placeholder="Enter 'ADMIN' for broker access (Optional)"
                 onChange={handleChange}
+                value={formdata.role}
               />
             </div>
           </CardContent>
-          <CardFooter className="flex flex-col">
-            <Button className="w-full" type="submit">
-              Sign Up
+          <CardFooter className="flex flex-col gap-4">
+            <Button className="w-full" type="submit" disabled={isLoading}>
+              {isLoading ? "Creating Account..." : "Sign Up"}
             </Button>
+            {message && (
+              <p
+                className={`text-sm ${
+                  message.includes("error")
+                    ? "text-destructive"
+                    : "text-green-600"
+                }`}
+              >
+                {message}
+              </p>
+            )}
           </CardFooter>
         </Card>
-        {message && <p className="mt-4 text-center">{message}</p>}
         <div className="mt-4 text-center text-sm">
-          Already have an account
+          Already have an account?{" "}
           <Link className="underline ml-2" href="/signin">
             Sign In
           </Link>
